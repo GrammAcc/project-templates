@@ -1,0 +1,14 @@
+# Creates a minimal venv and installs hatch locally.
+
+# Usage: `source gethatch`
+
+# If venv already exists, then it will still attempt to
+# create the .venv directory and install hatch. This will
+# fail with an error, but the ultimate result will still
+# be the local virtual environment being sourced and hatch
+# being installed locally if it is not already.
+
+mkdir .venv
+python -m venv .venv
+source .venv/bin/activate
+pip install hatch

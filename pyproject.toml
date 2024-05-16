@@ -1,0 +1,141 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "packagename"
+dynamic = ["version"]
+description = "GrammAcc's Python/Flask Project Template"
+authors = [{name = "GrammAcc", email = "grammacc@example.com"}]
+maintainers = [{name = "GrammAcc", email = "grammacc@example.com"}]
+license = "MIT"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "flask[async]",
+    "sqlalchemy[asyncio]",
+    "flask-cors",
+    "requests",
+    "aiosqlite",
+]
+
+
+[project.optional-dependencies]
+dev = ["hatch"]
+postgres = ["asyncpg"]
+
+[tool.hatch.version]
+path = "src/packagename/__init__.py"
+
+
+[tool.hatch.build]
+ignore-vcs = true
+include = ["*.json", "py.typed"]
+
+
+# This is needed for hatchling to find the version in the package __init__.py file.
+# See https://github.com/pypa/hatch/issues/981#issuecomment-1743631364
+[tool.hatch.build.targets.sdist]
+include = ["src"]
+
+# This is needed for hatchling to find the version in the package __init__.py file.
+# See https://github.com/pypa/hatch/issues/981#issuecomment-1743631364
+[tool.hatch.build.targets.wheel]
+packages = ["src/packagename"]
+
+
+[tool.hatch.envs.default]
+python = "3.12"
+dependencies = ["asyncpg"]
+
+[tool.hatch.envs.default.scripts]
+ci = [
+    "hatch run test:suite",
+    "hatch run -py=3.12 test:cov",
+    "hatch run docs:test",
+    "hatch run types:check",
+    "hatch run style:lintsrc",
+    "hatch run style:linttests",
+]
+all = [
+    "hatch run style:format",
+    "- hatch run test:suite",
+    "- hatch run -py=3.12 test:cov",
+    "- hatch run docs:test",
+    "- hatch run types:check",
+    "- hatch run style:lintsrc",
+    "- hatch run style:linttests",
+]
+
+
+[tool.hatch.envs.test]
+description = "Test Suite and Coverage Reporting"
+dependencies = [
+    "pytest",
+    "pytest-cov",
+]
+
+[[tool.hatch.envs.test.matrix]]
+python = ["3.10", "3.11", "3.12"]
+
+[tool.hatch.envs.test.scripts]
+suite = "pytest"
+cov = "pytest --cov-config=pyproject.toml --cov-report html:htmlcov --cov=packagename"
+
+[tool.hatch.envs.types]
+description = "Run static type checker"
+dependencies = [
+    "mypy",
+    "types-flask-cors",
+    "types-requests",
+]
+
+[tool.hatch.envs.types.scripts]
+check = "mypy -p packagename"
+
+
+[tool.hatch.envs.style]
+detached = true
+python = "3.12"
+description = "Autoformatting and Linting"
+dependencies = [
+    "black",
+    "flake8",
+]
+
+[tool.hatch.envs.style.scripts]
+format = "black ."
+lintsrc = "flake8 src"
+linttests = "flake8 --extend-ignore E501 tests"
+
+
+[tool.hatch.envs.docs]
+description = "Documentation generation and utilities"
+dependencies = [
+    "pdoc",
+    "pytest",
+]
+
+[tool.hatch.envs.docs.scripts]
+build = "pdoc 'packagename' --docformat='google' --output-directory='docs/site'"
+serve = "python docs/serve.py"
+test = "python docs/run_doctests.py"
+
+[tool.pytest.ini_options]
+log_file="testsuite.log"
+log_file_level="DEBUG"
+addopts = "--import-mode=importlib --show-capture=no"
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+omit = ["utils.py"]
+
+[tool.coverage.run]
+source = ["packagename"]
+
+[tool.poetry]
+package-mode = false

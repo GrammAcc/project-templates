@@ -1,0 +1,6 @@
+{
+  "SECRET_KEY": "replace this with a generated secret token",
+  "SEED_DB": false,
+  "DB_URI": "postgresql+asyncpg://postgres:postgres@remotehost:5432",
+  "PREFERRED_URL_SCHEME": "https"
+}
