@@ -10,10 +10,10 @@ import asyncio
 
 from pathlib import Path
 
-from flask import Flask
+from flask import Flask, Response
 from flask_cors import CORS
 
-from . import api, db, utils
+from . import api, db, utils, frontend
 
 
 __version__ = "0.0.1"
@@ -50,8 +50,15 @@ async def _create_app(custom_config: dict = {}, dev_mode: bool = True) -> Flask:
 
     CORS(app)
 
+    @app.route("/favicon.ico", methods=["GET"])
+    def i_hate_automatic_favicon_requests():
+        return Response(status=404)
+
     # Register routes for version 1 of the api.
     app.register_blueprint(api.v1.bp, url_prefix="/api/v1")
+    # Register routes for the frontend.
+    # app.register_blueprint(frontend.static.bp, url_prefix="/")
+    app.register_blueprint(frontend.spa.bp, url_prefix="/")
 
     # Setup the database.
     db.connect(app.config["DB_URI"], debug=utils.is_dev_mode())

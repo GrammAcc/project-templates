@@ -12,7 +12,7 @@ media
 **/dist
 **/*.egg-info
 **/htmlcov
-**/site
+docs/site
 **/*.bak
 **/.tox
 **/.pytype

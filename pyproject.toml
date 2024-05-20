@@ -50,6 +50,7 @@ dependencies = ["asyncpg"]
 
 [tool.hatch.envs.default.scripts]
 ci = [
+    "hatch run frontend:build",
     "hatch run test:suite",
     "hatch run -py=3.12 test:cov",
     "hatch run docs:test",
@@ -59,6 +60,7 @@ ci = [
 ]
 all = [
     "hatch run style:format",
+    "- hatch run frontend:build",
     "- hatch run test:suite",
     "- hatch run -py=3.12 test:cov",
     "- hatch run docs:test",
@@ -120,6 +122,14 @@ dependencies = [
 build = "pdoc 'packagename' --docformat='google' --output-directory='docs/site'"
 serve = "python docs/serve.py"
 test = "python docs/run_doctests.py"
+
+[tool.hatch.envs.frontend]
+description = "Utilities for building/deploying the frontend"
+detached = true
+
+[tool.hatch.envs.frontend.scripts]
+build = "python mkfe.py"
+
 
 [tool.pytest.ini_options]
 log_file="testsuite.log"
