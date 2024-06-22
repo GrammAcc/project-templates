@@ -1,6 +1,8 @@
 import asyncio
 
-from sqlalchemy import insert
+from sqlalchemy import insert, event
+from sqlalchemy.pool import ConnectionPoolEntry
+from sqlalchemy.engine.interfaces import DBAPIConnection
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_scoped_session,
@@ -16,6 +18,21 @@ _Session = async_scoped_session(
     async_sessionmaker(bind=_engine, expire_on_commit=False),
     scopefunc=asyncio.current_task,
 )
+
+
+def _enable_sqlite_fks(
+    dbapi_con: DBAPIConnection, connection_record: ConnectionPoolEntry
+):
+    """SQLite3 does not enable foreign key constraints by default.
+    We have to enable them with a pragma query, but this will cause errors
+    in other backends, so we check that we are connected to a SQLite db before
+    sending the pragma."""
+
+    if _engine.dialect.name == "sqlite":
+        dbapi_con.cursor().execute("PRAGMA foreign_keys = ON;")
+
+
+event.listen(_engine.sync_engine, "connect", _enable_sqlite_fks)
 
 
 async def _create_all(drop: bool = False) -> None:
@@ -75,6 +92,7 @@ def _connect(db_uri: str, debug: bool = False) -> None:
         async_sessionmaker(bind=_engine, expire_on_commit=False),
         scopefunc=asyncio.current_task,
     )
+    event.listen(_engine.sync_engine, "connect", _enable_sqlite_fks)
 
 
 def get_session() -> AsyncSession:
